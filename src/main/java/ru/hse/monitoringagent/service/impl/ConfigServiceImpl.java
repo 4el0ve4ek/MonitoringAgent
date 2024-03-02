@@ -20,30 +20,30 @@ public class ConfigServiceImpl implements ConfigService, ConfigGetter {
 
     @Override
     public void updateMetricRate(int newRate) {
-        var oldConfig = get();
-        var newConfig = oldConfig.cloneWithSchedulerRate(newRate);
-        configRepository.update(newConfig);
+        var config = get();
+        config.setSchedulerRate(newRate);
+        configRepository.update(config);
     }
 
     @Override
-    public void addMetricHost(String host) {
-        var oldConfig = get();
+    public void addMetricURL(String host) {
+        var config = get();
 
-        var metricHosts = oldConfig.getMetricHosts();
+        var metricHosts = config.getMetricURLs();
         metricHosts.add(host);
 
-        var newConfig = oldConfig.cloneWithMetricHosts(metricHosts);
-        configRepository.update(newConfig);
+        config.setMetricURLs(metricHosts);
+        configRepository.update(config);
     }
 
     @Override
-    public void removeMetricHost(String host) {
-        var oldConfig = get();
+    public void removeMetricURL(String host) {
+        var config = get();
 
-        var metricHosts = oldConfig.getMetricHosts();
+        var metricHosts = config.getMetricURLs();
         metricHosts.remove(host);
 
-        var newConfig = oldConfig.cloneWithMetricHosts(metricHosts);
-        configRepository.update(newConfig);
+        config.setMetricURLs(metricHosts);
+        configRepository.update(config);
     }
 }

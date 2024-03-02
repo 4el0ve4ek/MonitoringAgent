@@ -24,11 +24,11 @@ public class MetricController {
     private final Logger logger = LoggerFactory.getLogger(MetricController.class);
 
     @RequestMapping(method= RequestMethod.GET, path = "/metrics/prometheus")
-    public byte[] getterPrometheusMetric() {
+    public String getterPrometheusMetric() {
         var metrics = metricService.getAll();
 
         try {
-            return prometheusMarshaller.marshalJSON(metrics);
+            return prometheusMarshaller.marshal(metrics);
         } catch (IOException e) {
             logger.error(e.toString());
             return null;

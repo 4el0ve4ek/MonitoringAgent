@@ -9,5 +9,5 @@ import java.util.List;
 public interface MetricService {
     public List<Metric> getAll();
 
-    void update(String host, List<Metric> metrics);
+    void update(List<Metric> metrics);
 }

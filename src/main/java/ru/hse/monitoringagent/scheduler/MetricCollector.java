@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.hse.monitoringagent.service.ConfigGetter;
-import ru.hse.monitoringagent.service.ConfigService;
 import ru.hse.monitoringagent.service.MetricService;
 import ru.hse.monitoringagent.service.MetricUnmarshaller;
 
@@ -35,22 +34,28 @@ public class MetricCollector {
     @SneakyThrows
     @Scheduled(fixedRateString = "${metrics.scheduler.rate}")
     public void collectMetrics() {
-        var metricsHosts = configGetter.get().getMetricHosts();
+        var metricsURLs = configGetter.get().getMetricURLs();
 
-        for(String host: metricsHosts) {
-            var request = HttpRequest.newBuilder(URI.create(host))
+        for(String sourceURL: metricsURLs) {
+            var request = HttpRequest
+                    .newBuilder(URI.create(sourceURL))
                     .GET()
                     .build();
 
 
-            var response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
                 logger.error("non 200 status code request");
                 return;
             }
 
-            var metrics = metricUnmarshaller.unmarshalJSON(response.body());
-            metricService.update(host, metrics);
+
+            var metrics = metricUnmarshaller.unmarshal(response.body());
+            for(var metric : metrics){
+                metric.source = sourceURL;
+            }
+
+            metricService.update(metrics);
         }
     }
 

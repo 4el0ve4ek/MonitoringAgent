@@ -4,13 +4,13 @@ import java.util.List;
 
 public class Config {
     private int schedulerRate;
-    private List<String> metricHosts;
+    private List<String> metricURLs;
 
     public Config clone() {
         Config copiedConfig = new Config();
 
         copiedConfig.schedulerRate = this.schedulerRate;
-        copiedConfig.metricHosts = List.copyOf(this.metricHosts);
+        copiedConfig.metricURLs = List.copyOf(this.metricURLs);
 
         return copiedConfig;
     }
@@ -18,22 +18,15 @@ public class Config {
         return schedulerRate;
     }
 
-    public List<String> getMetricHosts() {
-        return metricHosts;
+    public void setSchedulerRate(int newRate) {
+        schedulerRate = newRate;
     }
 
-
-    public Config cloneWithSchedulerRate(int schedulerRate) {
-        Config clonnedConfig = this.clone();
-        clonnedConfig.schedulerRate = schedulerRate;
-
-        return clonnedConfig;
+    public List<String> getMetricURLs() {
+        return metricURLs;
     }
 
-    public Config cloneWithMetricHosts(List<String> metricHosts) {
-        Config clonnedConfig = this.clone();
-        clonnedConfig.metricHosts = metricHosts;
-
-        return clonnedConfig;
+    public void setMetricURLs(List<String> newMetricURLs) {
+        metricURLs = newMetricURLs;
     }
 }
