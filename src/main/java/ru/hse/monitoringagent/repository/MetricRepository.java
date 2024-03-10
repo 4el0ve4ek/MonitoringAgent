@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MetricRepository extends JpaRepository<Metric, String> {
-    List<Metric> removeMetricByNameAndSource(String name, String source);
+    void removeMetricByNameAndSource(String name, String source);
 }
