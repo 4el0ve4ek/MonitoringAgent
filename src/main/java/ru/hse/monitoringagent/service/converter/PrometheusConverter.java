@@ -5,7 +5,6 @@ import ru.hse.monitoringagent.model.Metric;
 import ru.hse.monitoringagent.service.MetricMarshaller;
 import ru.hse.monitoringagent.service.MetricUnmarshaller;
 
-import java.io.IOException;
 import java.util.*;
 
 
@@ -17,9 +16,8 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
 
     @Override
     public String marshal(List<Metric> metrics) {
-        // TODO:https://prometheus.io/docs/instrumenting/exposition_formats/
         var buf = new StringBuffer();
-        for (var metric :metrics) {
+        for (var metric : metrics) {
             appendMetric(buf, metric);
         }
 
@@ -45,13 +43,13 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         }
 
         buf.append(metric.name);
-        if(!metric.labels.isEmpty() || !metric.source.isEmpty()) {
+        if (!metric.labels.isEmpty() || !metric.source.isEmpty()) {
             var labels = new TreeMap<>(Map.copyOf(metric.labels));
-            if(!metric.source.isEmpty()) {
+            if (!metric.source.isEmpty()) {
                 labels.put("ma_source", metric.source);
             }
             buf.append("{");
-            for(var entry : labels.entrySet()) {
+            for (var entry : labels.entrySet()) {
                 buf.append(entry.getKey());
                 buf.append("=");
                 buf.append(entry.getValue());
@@ -65,10 +63,10 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
 
     @Override
     public List<Metric> unmarshal(String data) {
-        StringTokenizer linesTokens = new StringTokenizer(data,"\n");
+        StringTokenizer linesTokens = new StringTokenizer(data, "\n");
 
         List<Metric> res = new ArrayList<>();
-        while(linesTokens.hasMoreTokens()) {
+        while (linesTokens.hasMoreTokens()) {
             String line = linesTokens.nextToken().trim();
             ArrayList<String> rawMetric = new ArrayList<>(4);
             while (isSpecialLine(line)) {
@@ -92,11 +90,11 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
     }
 
     private Optional<Metric> parseMetric(List<String> lines) {
-        String description = parseSpecial(lines, helpPrefix);
-        String type = parseSpecial(lines, typePrefix);
+        String description = findSpecialByPrefix(lines, helpPrefix);
+        String type = findSpecialByPrefix(lines, typePrefix);
 
         lines = lines.stream().filter(val -> !val.startsWith("#")).toList();
-        if(lines.isEmpty()) {
+        if (lines.isEmpty()) {
             return Optional.empty();
         }
         String line = lines.get(0);
@@ -104,7 +102,7 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         int labelEnd = line.lastIndexOf("}");
         Map<String, String> labels = parseLabels(line, labelStart, labelEnd);
 
-        if(labelStart != -1) {
+        if (labelStart != -1) {
             line = line.substring(0, labelStart) + line.substring(labelEnd + 1);
         }
 
@@ -124,13 +122,13 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
     }
 
     private Map<String, String> parseLabels(String raw, int start, int end) {
-        if(start == -1 || end == -1 || start > end) {
+        if (start == -1 || end == -1 || start > end) {
             return Map.of();
         }
 
         HashMap<String, String> labels = new HashMap<>();
         StringTokenizer labelPairs = new StringTokenizer(raw.substring(start + 1, end), ",");
-        while(labelPairs.hasMoreTokens()) {
+        while (labelPairs.hasMoreTokens()) {
             String pair = labelPairs.nextToken();
             String[] pairValues = pair.split("=", 2);
             labels.put(pairValues[0], pairValues[1]);
@@ -147,8 +145,8 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         }
     }
 
-    private String parseSpecial(List<String> lines, String prefix) {
-        for(var line : lines) {
+    private String findSpecialByPrefix(List<String> lines, String prefix) {
+        for (var line : lines) {
             if (line.startsWith(prefix)) {
                 return line.substring(prefix.length());
             }
@@ -161,6 +159,7 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         if (origin.startsWith(prefix)) {
             return origin.substring(prefix.length());
         }
+
         return origin;
     }
 }

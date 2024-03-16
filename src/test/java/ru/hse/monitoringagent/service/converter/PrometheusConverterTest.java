@@ -1,13 +1,9 @@
 package ru.hse.monitoringagent.service.converter;
 
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import ru.hse.monitoringagent.model.Metric;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,12 +12,11 @@ class PrometheusConverterTest {
     @Test
     void marshal() {
         var testData = List.of(
-                new Metric("go_goroutines", "", "", "", 1.1, Date.from(Instant.ofEpochSecond(10000)), Map.of(), 0L),
-                new Metric("go_goroutines", "", "", "", 2.2, Date.from(Instant.ofEpochSecond(10000)), Map.of("inp", "\"tag\""), 0L),
-
-                new Metric("go_goroutines", "localhost", "", "", 3.3, Date.from(Instant.ofEpochSecond(10000)), Map.of(), 0L),
-                new Metric("go_goroutines", "", "description", "", 4.4, Date.from(Instant.ofEpochSecond(10000)), Map.of(), 0L),
-                new Metric("go_goroutines", "", "", "type", 5.5, Date.from(Instant.ofEpochSecond(10000)), Map.of(), 0L)
+                new Metric().setName("go_goroutines").setValue(1.1),
+                new Metric().setName("go_goroutines").setValue(2.2).addLabel("inp", "\"tag\""),
+                new Metric().setName("go_goroutines").setValue(3.3).setSource("localhost"),
+                new Metric().setName("go_goroutines").setValue(4.4).setDescription("description"),
+                new Metric().setName("go_goroutines").setValue(5.5).setType("type")
         );
 
         var expectedLines =

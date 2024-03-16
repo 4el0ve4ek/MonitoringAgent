@@ -5,5 +5,5 @@ import ru.hse.monitoringagent.model.Config;
 
 @Service
 public interface ConfigGetter {
-    public Config get();
+    Config get();
 }

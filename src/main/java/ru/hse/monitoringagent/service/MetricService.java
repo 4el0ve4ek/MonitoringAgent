@@ -7,7 +7,7 @@ import java.util.List;
 
 @Service
 public interface MetricService {
-    public List<Metric> getAll();
+    List<Metric> getAll();
 
     void update(List<Metric> metrics);
 }

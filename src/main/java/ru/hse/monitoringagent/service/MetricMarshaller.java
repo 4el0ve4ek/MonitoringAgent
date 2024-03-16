@@ -6,5 +6,5 @@ import java.io.IOException;
 import java.util.List;
 
 public interface MetricMarshaller {
-    public String marshal(List<Metric> metrics) throws IOException;
+    String marshal(List<Metric> metrics) throws IOException;
 }

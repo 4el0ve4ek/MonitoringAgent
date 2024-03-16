@@ -2,36 +2,29 @@ package ru.hse.monitoringagent.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import ru.hse.monitoringagent.service.MetricMarshaller;
+import org.springframework.web.bind.annotation.RestController;
 import ru.hse.monitoringagent.service.MetricService;
+import ru.hse.monitoringagent.service.converter.PrometheusConverter;
 
-import java.io.IOException;
-
-@Controller
+@RestController()
+@RequestMapping("/metrics")
 public class MetricController {
 
-    @Autowired
-    private MetricService metricService;
-    @Autowired
-    private MetricMarshaller prometheusMarshaller;
-
+    private final MetricService metricService;
+    private final PrometheusConverter prometheusMarshaller;
     private final Logger logger = LoggerFactory.getLogger(MetricController.class);
 
-    @RequestMapping(method= RequestMethod.GET, path = "/metrics/prometheus")
+    public MetricController(MetricService metricService, PrometheusConverter prometheusMarshaller) {
+        this.metricService = metricService;
+        this.prometheusMarshaller = prometheusMarshaller;
+    }
+
+    @GetMapping("/prometheus")
     public String getterPrometheusMetric() {
         var metrics = metricService.getAll();
 
-        try {
-            return prometheusMarshaller.marshal(metrics);
-        } catch (IOException e) {
-            logger.error(e.toString());
-            return null;
-        }
+        return prometheusMarshaller.marshal(metrics);
     }
 }

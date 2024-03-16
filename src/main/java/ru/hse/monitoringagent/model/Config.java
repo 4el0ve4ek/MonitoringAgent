@@ -1,32 +1,32 @@
 package ru.hse.monitoringagent.model;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import java.util.List;
 
+@ConfigurationProperties(prefix = "monitoringagent")
 public class Config {
-    private int schedulerRate;
-    private List<String> metricURLs;
+    private int schedulerRate = 15000;
+    private List<String> prometheus = List.of();
 
-    public Config clone() {
-        Config copiedConfig = new Config();
 
-        copiedConfig.schedulerRate = this.schedulerRate;
-        copiedConfig.metricURLs = List.copyOf(this.metricURLs);
+    public Config(int schedulerRate, List<String> prometheus) {
+        this.schedulerRate = schedulerRate;
 
-        return copiedConfig;
+        if (prometheus == null) {
+            this.prometheus = List.of();
+        } else {
+            this.prometheus = List.copyOf(prometheus);
+        }
     }
+
     public int getSchedulerRate() {
         return schedulerRate;
     }
 
-    public void setSchedulerRate(int newRate) {
-        schedulerRate = newRate;
-    }
-
-    public List<String> getMetricURLs() {
-        return metricURLs;
-    }
-
-    public void setMetricURLs(List<String> newMetricURLs) {
-        metricURLs = newMetricURLs;
+    public List<String> getPrometheusURLs() {
+        return prometheus;
     }
 }
+
+

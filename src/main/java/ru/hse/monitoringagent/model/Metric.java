@@ -1,47 +1,49 @@
 package ru.hse.monitoringagent.model;
 
 
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.ToString;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Entity
 @ToString
 public class Metric {
-    public String name;
-    public String source;
-    public String description;
-    public String type;
-    public double value;
-
-    public Date lastUpdateTime;
-
-    @Transient
-    public Map<String, String> labels;
 
     @Id
-    public   Long id;
+    @Column(name = "id", nullable = false)
+    private String generatedCompoundID;
 
-    public Metric setName(String name) {
-        this.name = name;
-        return this;
-    }
+    public String name;
+    public String source;
+    @ElementCollection
+    public Map<String, String> labels;
+
+    public String type;
+
+    public double value;
+    public String description;
+    public Date lastUpdateTime;
 
     public Metric() {
         labels = new HashMap<>();
         description = "";
         type = "";
+        source = "";
         name = "";
+    }
+
+    public Metric setName(String name) {
+        this.name = name;
+        return this;
     }
 
     public Metric setSource(String source) {
@@ -67,5 +69,15 @@ public class Metric {
     public Metric addLabel(String key, String value) {
         this.labels.put(key, value);
         return this;
+    }
+
+    public void calcID() {
+        String compoundLabels = labels.
+                entrySet().
+                stream().
+                map(e -> e.getKey() + "," + e.getValue() + ";").
+                collect(Collectors.joining());
+
+        generatedCompoundID = name + "#" + source + "#" + compoundLabels;
     }
 }

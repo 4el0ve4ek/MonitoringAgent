@@ -7,6 +7,8 @@ import ru.hse.monitoringagent.repository.ConfigRepository;
 import ru.hse.monitoringagent.service.ConfigGetter;
 import ru.hse.monitoringagent.service.ConfigService;
 
+import java.util.ArrayList;
+
 @Service
 public class ConfigServiceImpl implements ConfigService, ConfigGetter {
     @Autowired
@@ -21,29 +23,27 @@ public class ConfigServiceImpl implements ConfigService, ConfigGetter {
     @Override
     public void updateMetricRate(int newRate) {
         var config = get();
-        config.setSchedulerRate(newRate);
-        configRepository.update(config);
+
+        configRepository.update(new Config(newRate, config.getPrometheusURLs()));
     }
 
     @Override
     public void addMetricURL(String host) {
         var config = get();
 
-        var metricHosts = config.getMetricURLs();
+        var metricHosts = new ArrayList<>(config.getPrometheusURLs());
         metricHosts.add(host);
 
-        config.setMetricURLs(metricHosts);
-        configRepository.update(config);
+        configRepository.update(new Config(config.getSchedulerRate(), metricHosts));
     }
 
     @Override
     public void removeMetricURL(String host) {
         var config = get();
 
-        var metricHosts = config.getMetricURLs();
+        var metricHosts = new ArrayList<>(config.getPrometheusURLs());
         metricHosts.remove(host);
 
-        config.setMetricURLs(metricHosts);
-        configRepository.update(config);
+        configRepository.update(new Config(config.getSchedulerRate(), metricHosts));
     }
 }
