@@ -17,7 +17,12 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
     @Override
     public String marshal(List<Metric> metrics) {
         var buf = new StringBuffer();
-        for (var metric : metrics) {
+
+        var metricsStream = metrics.stream().sorted(Comparator.
+                comparing(Metric::getSource).
+                thenComparing(Metric::getName)
+        );
+        for (var metric : metricsStream.toList()) {
             appendMetric(buf, metric);
         }
 
@@ -25,39 +30,40 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
     }
 
     private void appendMetric(StringBuffer buf, Metric metric) {
-        if (!metric.description.isEmpty()) {
+        if (!metric.getDescription().isEmpty()) {
             buf.append(helpPrefix);
-            buf.append(metric.name);
+            buf.append(metric.getName());
             buf.append(" ");
-            buf.append(metric.description);
+            buf.append(metric.getDescription());
             buf.append("\n");
         }
 
         // tmp unused
-        if (!metric.type.isEmpty()) {
+        if (!metric.getType().isEmpty()) {
             buf.append(typePrefix);
-            buf.append(metric.name);
+            buf.append(metric.getName());
             buf.append(" ");
-            buf.append(metric.type);
+            buf.append(metric.getType());
             buf.append("\n");
         }
 
-        buf.append(metric.name);
-        if (!metric.labels.isEmpty() || !metric.source.isEmpty()) {
-            var labels = new TreeMap<>(Map.copyOf(metric.labels));
-            if (!metric.source.isEmpty()) {
-                labels.put("ma_source", metric.source);
+        buf.append(metric.getName());
+        if (!metric.getLabels().isEmpty() || !metric.getSource().isEmpty()) {
+            var labels = new TreeMap<>(Map.copyOf(metric.getLabels()));
+            if (!metric.getSource().isEmpty()) {
+                labels.put("agent_source", metric.getSource());
             }
             buf.append("{");
             for (var entry : labels.entrySet()) {
                 buf.append(entry.getKey());
                 buf.append("=");
                 buf.append(entry.getValue());
+                buf.append(",");
             }
             buf.append("}");
         }
         buf.append(" ");
-        buf.append(metric.value);
+        buf.append(metric.getValue());
         buf.append("\n\n");
     }
 
@@ -111,12 +117,12 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         float value = parseValue(parts[1]);
 //        String amendTimestamp = parts[2];
 
-        Metric metric = new Metric();
-        metric.name = metricName;
-        metric.value = value;
-        metric.description = trimPrefix(description, metricName + " ");
-        metric.type = trimPrefix(type, metricName + " ");
-        metric.labels = labels;
+        Metric metric = new Metric().
+                setName(metricName).
+                setValue(value).
+                setDescription(trimPrefix(description, metricName + " ")).
+                setType(trimPrefix(type, metricName + " ")).
+                setLabels(labels);
 
         return Optional.of(metric);
     }

@@ -20,7 +20,6 @@ public class MetricCollector {
     private final MetricUnmarshaller metricUnmarshaller;
 
     private final HttpClient client = HttpClient.newBuilder().build();
-
     private final Logger logger = LoggerFactory.getLogger(MetricCollector.class);
 
     public MetricCollector(MetricService metricService, Supplier<List<String>> urlGetter, MetricUnmarshaller metricUnmarshaller) {
@@ -29,7 +28,6 @@ public class MetricCollector {
         this.metricUnmarshaller = metricUnmarshaller;
     }
 
-    //    @Scheduled(fixedRateString = "${metrics.scheduler.rate}") // FIXME: it would be cool to use it from runtime variable
     public void collectMetrics() {
         var metricsURLs = urlGetter.get();
 
@@ -51,7 +49,7 @@ public class MetricCollector {
             }
 
             for (var metric : metrics) {
-                metric.source = sourceURL;
+                metric.setSource(sourceURL);
             }
 
             metricService.update(metrics);
@@ -64,7 +62,6 @@ public class MetricCollector {
                 .GET()
                 .build();
 
-
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new Exception("non 200 status code returned, but " + response.statusCode());
@@ -73,5 +70,4 @@ public class MetricCollector {
 
         return response.body();
     }
-
 }

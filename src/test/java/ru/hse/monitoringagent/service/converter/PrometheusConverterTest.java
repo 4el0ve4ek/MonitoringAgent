@@ -5,7 +5,7 @@ import ru.hse.monitoringagent.model.Metric;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PrometheusConverterTest {
 
@@ -20,18 +20,20 @@ class PrometheusConverterTest {
         );
 
         var expectedLines =
-                "go_goroutines 1.1\n" +
-                "\n" +
-                "go_goroutines{inp=\"tag\"} 2.2\n" +
-                "\n" +
-                "go_goroutines{ma_source=localhost} 3.3\n" +
-                "\n" +
-                "# HELP go_goroutines description\n" +
-                "go_goroutines 4.4\n" +
-                "\n" +
-                "# TYPE go_goroutines type\n" +
-                "go_goroutines 5.5\n" +
-                "\n";
+                """
+                        go_goroutines 1.1
+
+                        go_goroutines{inp="tag"} 2.2
+
+                        go_goroutines{agent_source=localhost} 3.3
+
+                        # HELP go_goroutines description
+                        go_goroutines 4.4
+
+                        # TYPE go_goroutines type
+                        go_goroutines 5.5
+
+                        """;
 
         var c = new PrometheusConverter();
         assertEquals(expectedLines, c.marshal(testData));
@@ -40,18 +42,20 @@ class PrometheusConverterTest {
     @Test
     void unmarshal() {
         var testData =
-                "go_goroutines 1.1\n" +
-                "go_goroutines{inp=\"tag\"} 2.2\n" +
-                "go_goroutines{ma_source=localhost} 3.3\n" +
-                "# HELP go_goroutines my_description\n" +
-                "go_goroutines 4.4\n" +
-                "# TYPE go_goroutines my_type\n" +
-                "go_goroutines 5.5\n";
+                """
+                        go_goroutines 1.1
+                        go_goroutines{inp="tag"} 2.2
+                        go_goroutines{agent_source=localhost} 3.3
+                        # HELP go_goroutines my_description
+                        go_goroutines 4.4
+                        # TYPE go_goroutines my_type
+                        go_goroutines 5.5
+                        """;
 
         var expectedMetrics = List.of(
                 new Metric().setName("go_goroutines").setValue(1.1),
                 new Metric().setName("go_goroutines").setValue(2.2).addLabel("inp", "\"tag\""),
-                new Metric().setName("go_goroutines").setValue(3.3).addLabel("ma_source", "localhost"),
+                new Metric().setName("go_goroutines").setValue(3.3).setSource("localhost"),
                 new Metric().setName("go_goroutines").setValue(4.4).setDescription("my_description"),
                 new Metric().setName("go_goroutines").setValue(5.5).setType("my_type")
         );
@@ -63,10 +67,10 @@ class PrometheusConverterTest {
             Metric got = gotMetrics.get(i);
             Metric expected = expectedMetrics.get(i);
 
-            assertEquals(expected.name, got.name, i + "th name is broken");
-            assertEquals(expected.value, got.value, 1e-6, i + "th value is broken");
-            assertEquals(expected.description, got.description,  i + "th description is broken");
-            assertEquals(expected.labels, got.labels, i + "th  labelsis broken");
+            assertEquals(expected.getName(), got.getName(), i + "th name is broken");
+            assertEquals(expected.getValue(), got.getValue(), 1e-6, i + "th value is broken");
+            assertEquals(expected.getDescription(), got.getDescription(), i + "th description is broken");
+            assertEquals(expected.getLabels(), got.getLabels(), i + "th  labelsis broken");
         }
     }
 }

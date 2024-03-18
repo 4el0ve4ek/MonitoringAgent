@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,22 +17,22 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Entity
 @ToString
-public class Metric {
+public class Metric implements Serializable {
 
     @Id
     @Column(name = "id", nullable = false)
     private String generatedCompoundID;
 
-    public String name;
-    public String source;
+    private String name;
+    private String source;
     @ElementCollection
-    public Map<String, String> labels;
+    private Map<String, String> labels;
 
-    public String type;
+    private String type;
 
-    public double value;
-    public String description;
-    public Date lastUpdateTime;
+    private double value;
+    private String description;
+    private Date lastUpdateTime;
 
     public Metric() {
         labels = new HashMap<>();
@@ -39,6 +40,31 @@ public class Metric {
         type = "";
         source = "";
         name = "";
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public Map<String, String> getLabels() {
+        return labels;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public Metric setName(String name) {
@@ -63,6 +89,11 @@ public class Metric {
 
     public Metric setValue(double value) {
         this.value = value;
+        return this;
+    }
+
+    public Metric setLabels(Map<String, String> labels) {
+        this.labels = labels;
         return this;
     }
 

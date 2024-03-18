@@ -28,7 +28,7 @@ public class MetricServiceImpl implements MetricService {
         for (var metric : metrics) {
             metric.calcID();
 
-            logger.info("update metric " + metric.name + " " + metric.source);
+            logger.info("update metric " + metric.getName() + " " + metric.getSource());
 
             metricRepository.save(metric);
         }
