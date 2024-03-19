@@ -29,7 +29,7 @@ public class MetricController {
     }
 
     @GetMapping("/prometheus")
-    public String getterPrometheusMetric(@RequestParam boolean force) {
+    public String getterPrometheusMetric(@RequestParam(required = false) boolean force) {
         List<Metric> metrics = force ? metricCollectors.collect() : metricService.getAll();
 
         return prometheusMarshaller.marshal(metrics);
