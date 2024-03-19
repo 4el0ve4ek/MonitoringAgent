@@ -22,17 +22,12 @@ class PrometheusConverterTest {
         var expectedLines =
                 """
                         go_goroutines 1.1
-
                         go_goroutines{inp="tag"} 2.2
-
                         go_goroutines{agent_source=localhost} 3.3
-
                         # HELP go_goroutines description
                         go_goroutines 4.4
-
                         # TYPE go_goroutines type
                         go_goroutines 5.5
-
                         """;
 
         var c = new PrometheusConverter();

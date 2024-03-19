@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.hse.monitoringagent.model.Metric;
 import ru.hse.monitoringagent.repository.MetricRepository;
+import ru.hse.monitoringagent.repository.SnapshotRepository;
 import ru.hse.monitoringagent.service.MetricService;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public class MetricServiceImpl implements MetricService {
     @Autowired
     private MetricRepository metricRepository;
 
+    @Autowired
+    private SnapshotRepository snapshotRepository;
+
     @Override
     public List<Metric> getAll() {
         return metricRepository.findAll();
@@ -27,8 +31,6 @@ public class MetricServiceImpl implements MetricService {
     public void update(List<Metric> metrics) {
         for (var metric : metrics) {
             metric.calcID();
-
-            logger.info("update metric " + metric.getName() + " " + metric.getSource());
 
             metricRepository.save(metric);
         }

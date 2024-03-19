@@ -103,11 +103,11 @@ public class Metric implements Serializable {
     }
 
     public void calcID() {
-        String compoundLabels = labels.
-                entrySet().
-                stream().
-                map(e -> e.getKey() + "," + e.getValue() + ";").
-                collect(Collectors.joining());
+        String compoundLabels = labels
+                .entrySet()
+                .stream()
+                .map(e -> e.getKey() + "," + e.getValue() + ";")
+                .collect(Collectors.joining());
 
         generatedCompoundID = name + "#" + source + "#" + compoundLabels;
     }

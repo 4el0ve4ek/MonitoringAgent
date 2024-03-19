@@ -1,35 +1,35 @@
-package ru.hse.monitoringagent.scheduler;
+package ru.hse.monitoringagent.service.collector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.hse.monitoringagent.model.Metric;
-import ru.hse.monitoringagent.service.MetricService;
 import ru.hse.monitoringagent.service.MetricUnmarshaller;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 public class MetricCollector {
 
-    private final MetricService metricService;
     private final Supplier<List<String>> urlGetter;
     private final MetricUnmarshaller metricUnmarshaller;
 
     private final HttpClient client = HttpClient.newBuilder().build();
     private final Logger logger = LoggerFactory.getLogger(MetricCollector.class);
 
-    public MetricCollector(MetricService metricService, Supplier<List<String>> urlGetter, MetricUnmarshaller metricUnmarshaller) {
-        this.metricService = metricService;
+    public MetricCollector(Supplier<List<String>> urlGetter, MetricUnmarshaller metricUnmarshaller) {
         this.urlGetter = urlGetter;
         this.metricUnmarshaller = metricUnmarshaller;
     }
 
-    public void collectMetrics() {
+    public List<Metric> collect() {
         var metricsURLs = urlGetter.get();
+
+        var ret = new ArrayList<Metric>();
 
         for (String sourceURL : metricsURLs) {
             String rawMetrics = "";
@@ -52,8 +52,10 @@ public class MetricCollector {
                 metric.setSource(sourceURL);
             }
 
-            metricService.update(metrics);
+            ret.addAll(metrics);
         }
+
+        return ret;
     }
 
     private String doRequest(String url) throws Exception {

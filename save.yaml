@@ -1,0 +1,3 @@
+!!ru.hse.monitoringagent.model.Config
+prometheusURLs: []
+schedulerRate: 1000

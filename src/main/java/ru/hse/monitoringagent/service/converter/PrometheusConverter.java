@@ -18,9 +18,9 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
     public String marshal(List<Metric> metrics) {
         var buf = new StringBuffer();
 
-        var metricsStream = metrics.stream().sorted(Comparator.
-                comparing(Metric::getSource).
-                thenComparing(Metric::getName)
+        var metricsStream = metrics.stream().sorted(Comparator
+                .comparing(Metric::getSource)
+                .thenComparing(Metric::getName)
         );
         for (var metric : metricsStream.toList()) {
             appendMetric(buf, metric);
@@ -64,7 +64,7 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         }
         buf.append(" ");
         buf.append(metric.getValue());
-        buf.append("\n\n");
+        buf.append("\n");
     }
 
     @Override
@@ -117,12 +117,12 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         float value = parseValue(parts[1]);
 //        String amendTimestamp = parts[2];
 
-        Metric metric = new Metric().
-                setName(metricName).
-                setValue(value).
-                setDescription(trimPrefix(description, metricName + " ")).
-                setType(trimPrefix(type, metricName + " ")).
-                setLabels(labels);
+        Metric metric = new Metric()
+                .setName(metricName)
+                .setValue(value)
+                .setDescription(trimPrefix(description, metricName + " "))
+                .setType(trimPrefix(type, metricName + " "))
+                .setLabels(labels);
 
         return Optional.of(metric);
     }
