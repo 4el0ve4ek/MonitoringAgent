@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Файлы создаваемые в рантайме приложения: ###
+dump.sql
+save.yaml
