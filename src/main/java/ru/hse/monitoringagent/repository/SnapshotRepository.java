@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+
 @Repository
 public class SnapshotRepository {
 
@@ -17,9 +19,13 @@ public class SnapshotRepository {
     @PreDestroy
     public void saveData() {
         logger.info("save data to file");
-        
+        var now = Instant.now();
+
         try {
             jdbcTemplate.execute("SCRIPT TO 'dump.sql'");
+
+            var diff = Instant.now().toEpochMilli() - now.toEpochMilli();
+            logger.info("saving data takes " + (double) (diff) / 1000. + "s");
         } catch (Exception ex) {
             logger.error(ex.toString());
         }

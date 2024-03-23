@@ -6,13 +6,15 @@ import ru.hse.monitoringagent.service.MetricMarshaller;
 import ru.hse.monitoringagent.service.MetricUnmarshaller;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
 public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller {
 
-    private final String helpPrefix = "# HELP ";
-    private final String typePrefix = "# TYPE ";
+    private static final String helpPrefix = "# HELP ";
+    private static final String typePrefix = "# TYPE ";
+    private static final String labelSourcePrefix = "agent_source";
 
     @Override
     public String marshal(List<Metric> metrics) {
@@ -25,6 +27,8 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         for (var metric : metricsStream.toList()) {
             appendMetric(buf, metric);
         }
+
+        buf.append("# EOF");
 
         return buf.toString();
     }
@@ -51,19 +55,38 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         if (!metric.getLabels().isEmpty() || !metric.getSource().isEmpty()) {
             var labels = new TreeMap<>(Map.copyOf(metric.getLabels()));
             if (!metric.getSource().isEmpty()) {
-                labels.put("agent_source", metric.getSource());
+                var labelName = labelSourcePrefix;
+                // to prevent overriding
+                if (labels.containsKey(labelName)) {
+                    labelName = labelName + "_" + new Random().nextLong();
+                }
+
+                labels.put(labelName, metric.getSource());
             }
             buf.append("{");
-            for (var entry : labels.entrySet()) {
-                buf.append(entry.getKey());
-                buf.append("=");
-                buf.append(entry.getValue());
-                buf.append(",");
-            }
+
+            var labelsMarshalled = labels.entrySet()
+                    .stream()
+                    .map(entry ->
+                            entry.getKey()
+                                    + "=\""
+                                    + entry.getValue()
+                                    + "\""
+                    )
+                    .collect(Collectors.joining(","));
+
+            buf.append(labelsMarshalled);
             buf.append("}");
         }
         buf.append(" ");
-        buf.append(metric.getValue());
+        buf.append(trimSuffix(Double.toString(metric.getValue()).toLowerCase(), ".0"));
+
+        var collectTime = metric.getCollectTime();
+        if (collectTime > 0) {
+            buf.append(" ");
+            buf.append(collectTime);
+        }
+
         buf.append("\n");
     }
 
@@ -114,15 +137,20 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
 
         var parts = line.split(" ", 3);
         String metricName = parts[0];
-        float value = parseValue(parts[1]);
-//        String amendTimestamp = parts[2];
+        double value = robustParseDouble(parts[1]);
+
+        long collectTimestamp = 0;
+        if (parts.length > 2) {
+            collectTimestamp = robustParseLong(parts[2]);
+        }
 
         Metric metric = new Metric()
                 .setName(metricName)
                 .setValue(value)
                 .setDescription(trimPrefix(description, metricName + " "))
                 .setType(trimPrefix(type, metricName + " "))
-                .setLabels(labels);
+                .setLabels(labels)
+                .setCollectTime(collectTimestamp);
 
         return Optional.of(metric);
     }
@@ -137,15 +165,23 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         while (labelPairs.hasMoreTokens()) {
             String pair = labelPairs.nextToken();
             String[] pairValues = pair.split("=", 2);
-            labels.put(pairValues[0], pairValues[1]);
+            labels.put(pairValues[0], trim(pairValues[1], "\""));
         }
 
         return labels;
     }
 
-    private float parseValue(String rawValue) {
+    private double robustParseDouble(String rawValue) {
         try {
-            return Float.parseFloat(rawValue);
+            return Double.parseDouble(rawValue);
+        } catch (NumberFormatException ex) {
+            return 0;
+        }
+    }
+
+    private long robustParseLong(String rawValue) {
+        try {
+            return Long.parseLong(rawValue);
         } catch (NumberFormatException ex) {
             return 0;
         }
@@ -167,5 +203,17 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
         }
 
         return origin;
+    }
+
+    private String trimSuffix(String origin, String prefix) {
+        if (origin.endsWith(prefix)) {
+            return origin.substring(0, origin.length() - prefix.length());
+        }
+
+        return origin;
+    }
+
+    private String trim(String origin, String pattern) {
+        return trimSuffix(trimPrefix(origin, pattern), pattern);
     }
 }

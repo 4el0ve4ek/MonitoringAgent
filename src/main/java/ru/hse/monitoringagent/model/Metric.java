@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,7 +31,8 @@ public class Metric implements Serializable {
 
     private double value;
     private String description;
-    private Date lastUpdateTime;
+
+    private long collectTime;
 
     public Metric() {
         labels = new HashMap<>();
@@ -67,6 +67,10 @@ public class Metric implements Serializable {
         return description;
     }
 
+    public long getCollectTime() {
+        return collectTime;
+    }
+
     public Metric setName(String name) {
         this.name = name;
         return this;
@@ -94,6 +98,11 @@ public class Metric implements Serializable {
 
     public Metric setLabels(Map<String, String> labels) {
         this.labels = labels;
+        return this;
+    }
+
+    public Metric setCollectTime(long collectTime) {
+        this.collectTime = collectTime;
         return this;
     }
 

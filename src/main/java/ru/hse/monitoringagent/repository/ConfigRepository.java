@@ -34,7 +34,7 @@ public class ConfigRepository {
     }
 
     @PostConstruct
-    private void init() {
+    private void readFromFile() {
         var file = new File(persistentFile);
         var loaderoptions = new LoaderOptions();
         TagInspector taginspector =
@@ -55,7 +55,7 @@ public class ConfigRepository {
 
 
     @PreDestroy
-    private void destroy() {
+    private void saveToFile() {
         var file = new File(persistentFile);
         var yaml = new Yaml();
 
@@ -74,6 +74,8 @@ public class ConfigRepository {
         } finally {
             lock.writeLock().unlock();
         }
+
+        saveToFile();
     }
 
     public Config getCopy() {

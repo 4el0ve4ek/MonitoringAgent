@@ -12,23 +12,26 @@ class PrometheusConverterTest {
     @Test
     void marshal() {
         var testData = List.of(
+                new Metric().setName("go_goroutines").setValue(1.0),
+                new Metric().setName("go_goroutines").setValue(1e10),
                 new Metric().setName("go_goroutines").setValue(1.1),
-                new Metric().setName("go_goroutines").setValue(2.2).addLabel("inp", "\"tag\""),
+                new Metric().setName("go_goroutines").setValue(2.2).addLabel("inp", "tag"),
                 new Metric().setName("go_goroutines").setValue(3.3).setSource("localhost"),
                 new Metric().setName("go_goroutines").setValue(4.4).setDescription("description"),
                 new Metric().setName("go_goroutines").setValue(5.5).setType("type")
         );
 
-        var expectedLines =
-                """
-                        go_goroutines 1.1
-                        go_goroutines{inp="tag"} 2.2
-                        go_goroutines{agent_source=localhost} 3.3
-                        # HELP go_goroutines description
-                        go_goroutines 4.4
-                        # TYPE go_goroutines type
-                        go_goroutines 5.5
-                        """;
+        var expectedLines = """
+                go_goroutines 1
+                go_goroutines 1.0e10
+                go_goroutines 1.1
+                go_goroutines{inp="tag"} 2.2
+                # HELP go_goroutines description
+                go_goroutines 4.4
+                # TYPE go_goroutines type
+                go_goroutines 5.5
+                go_goroutines{agent_source="localhost"} 3.3
+                # EOF""";
 
         var c = new PrometheusConverter();
         assertEquals(expectedLines, c.marshal(testData));
@@ -49,8 +52,8 @@ class PrometheusConverterTest {
 
         var expectedMetrics = List.of(
                 new Metric().setName("go_goroutines").setValue(1.1),
-                new Metric().setName("go_goroutines").setValue(2.2).addLabel("inp", "\"tag\""),
-                new Metric().setName("go_goroutines").setValue(3.3).setSource("localhost"),
+                new Metric().setName("go_goroutines").setValue(2.2).addLabel("inp", "tag"),
+                new Metric().setName("go_goroutines").setValue(3.3).addLabel("agent_source", "localhost"),
                 new Metric().setName("go_goroutines").setValue(4.4).setDescription("my_description"),
                 new Metric().setName("go_goroutines").setValue(5.5).setType("my_type")
         );

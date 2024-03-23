@@ -40,7 +40,7 @@ public class MetricController {
             boolean force
     ) {
         List<Metric> metrics = force ? metricCollectors.collect() : metricService.getAll();
-
+        logger.info("accessed");
         return prometheusMarshaller.marshal(metrics);
     }
 }
