@@ -1,5 +1,8 @@
 package ru.hse.monitoringagent.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +18,7 @@ import java.util.List;
 
 @RestController()
 @RequestMapping("/metrics")
+@Tag(name = "Метрики", description = "Ручки для получения метрик хранимых внутри агента")
 public class MetricController {
 
     private final MetricService metricService;
@@ -29,7 +33,12 @@ public class MetricController {
     }
 
     @GetMapping("/prometheus")
-    public String getterPrometheusMetric(@RequestParam(required = false) boolean force) {
+    @Operation(summary = "Получить метрики в формате prometheus", description = "Возвращает метрики в формате прометеус")
+    public String getterPrometheusMetric(
+            @RequestParam(required = false)
+            @Parameter(description = "Нужно ли получить метриики напрямую из эндпоинтов")
+            boolean force
+    ) {
         List<Metric> metrics = force ? metricCollectors.collect() : metricService.getAll();
 
         return prometheusMarshaller.marshal(metrics);
