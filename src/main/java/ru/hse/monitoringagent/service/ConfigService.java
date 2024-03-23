@@ -4,8 +4,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface ConfigService {
-    void updateMetricRate(int newRate);
+    void updatePollMetricRate(int newRate);
+
+    void updateSaveRate(int newRate);
+
     void addMetricURL(String host);
+
     void removeMetricURL(String host);
 }
 

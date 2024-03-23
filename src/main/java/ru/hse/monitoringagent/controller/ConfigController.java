@@ -5,8 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hse.monitoringagent.service.ConfigService;
 
-import java.util.Arrays;
-
 @RestController
 @RequestMapping("/config")
 public class ConfigController {
@@ -17,23 +15,33 @@ public class ConfigController {
         this.configService = configService;
     }
 
-    @PutMapping("/metrics/urls")
-    public void addMetricURL(@RequestBody String[] urls) {
-        Arrays.stream(urls).forEach(configService::addMetricURL);
+    @PutMapping("/metrics/url")
+    public void addMetricURL(@RequestParam(name = "value") String url) {
+        configService.addMetricURL(url);
     }
 
-    @DeleteMapping("/metrics/urls")
-    public void deleteMetricURL(@RequestBody String[] urls) {
-        Arrays.stream(urls).forEach(configService::removeMetricURL);
+    @DeleteMapping("/metrics/url")
+    public void deleteMetricURL(@RequestParam(name = "value") String url) {
+        configService.removeMetricURL(url);
     }
 
-    @PostMapping("/rate")
-    public ResponseEntity<?> setRate(@RequestParam(name = "value") int rate) {
+    @PostMapping("/poll/rate")
+    public ResponseEntity<?> setPollRate(@RequestParam(name = "value") int rate) {
         if (rate <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("rate must be positive number");
         }
 
-        configService.updateMetricRate(rate);
+        configService.updatePollMetricRate(rate);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/save/rate")
+    public ResponseEntity<?> setSaveRate(@RequestParam(name = "value") int rate) {
+        if (rate <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("rate must be positive number");
+        }
+
+        configService.updateSaveRate(rate);
         return ResponseEntity.ok().build();
     }
 

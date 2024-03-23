@@ -30,8 +30,7 @@ public class ConfigRepository {
     private Config config;
 
     public ConfigRepository(Config defaultConfig) {
-        config = new Config(defaultConfig.getSchedulerRate(), defaultConfig.getPrometheusURLs());
-
+        update(new Config(defaultConfig));
     }
 
     @PostConstruct
@@ -43,17 +42,15 @@ public class ConfigRepository {
         loaderoptions.setTagInspector(taginspector);
         Yaml yaml = new Yaml(new Constructor(Config.class, loaderoptions));
 
-        lock.writeLock().lock();
         if (file.exists()) {
             try (var fis = new FileInputStream(file)) {
-                config = yaml.loadAs(fis, Config.class);
+                update(yaml.loadAs(fis, Config.class));
             } catch (IOException e) {
                 logger.error(e.toString());
             }
         }
-        lock.writeLock().unlock();
 
-        logger.info(config.toString());
+        logger.info(getCopy().toString());
     }
 
 
@@ -63,14 +60,14 @@ public class ConfigRepository {
         var yaml = new Yaml();
 
         try (var fw = new FileWriter(file)) {
-            yaml.dump(config, fw);
+            yaml.dump(getCopy(), fw);
         } catch (IOException e) {
             logger.error(e.toString());
         }
     }
 
 
-    public synchronized void update(Config newConfig) {
+    public void update(Config newConfig) {
         lock.writeLock().lock();
         try {
             config = newConfig;
@@ -79,10 +76,10 @@ public class ConfigRepository {
         }
     }
 
-    public synchronized Config get() {
+    public Config getCopy() {
         lock.readLock().lock();
         try {
-            return config;
+            return new Config(config);
         } finally {
             lock.readLock().unlock();
         }

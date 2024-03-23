@@ -17,14 +17,20 @@ public class ConfigServiceImpl implements ConfigService, ConfigGetter {
 
     @Override
     public Config get() {
-        return configRepository.get();
+        return configRepository.getCopy();
     }
 
     @Override
-    public void updateMetricRate(int newRate) {
+    public void updatePollMetricRate(int newRate) {
         var config = get();
+        config.setPollRate(newRate);
+        configRepository.update(config);
+    }
 
-        configRepository.update(new Config(newRate, config.getPrometheusURLs()));
+    public void updateSaveRate(int newSaveRate) {
+        var config = get();
+        config.setSaveRate(newSaveRate);
+        configRepository.update(config);
     }
 
     @Override
@@ -34,7 +40,9 @@ public class ConfigServiceImpl implements ConfigService, ConfigGetter {
         var metricHosts = new ArrayList<>(config.getPrometheusURLs());
         metricHosts.add(host);
 
-        configRepository.update(new Config(config.getSchedulerRate(), metricHosts));
+        config.setPrometheusURLs(metricHosts);
+
+        configRepository.update(config);
     }
 
     @Override
@@ -44,6 +52,8 @@ public class ConfigServiceImpl implements ConfigService, ConfigGetter {
         var metricHosts = new ArrayList<>(config.getPrometheusURLs());
         metricHosts.remove(host);
 
-        configRepository.update(new Config(config.getSchedulerRate(), metricHosts));
+        config.setPrometheusURLs(metricHosts);
+
+        configRepository.update(config);
     }
 }
