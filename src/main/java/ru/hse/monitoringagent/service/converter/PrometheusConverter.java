@@ -42,7 +42,6 @@ public class PrometheusConverter implements MetricMarshaller, MetricUnmarshaller
             buf.append("\n");
         }
 
-        // tmp unused
         if (!metric.getType().isEmpty()) {
             buf.append(typePrefix);
             buf.append(metric.getName());

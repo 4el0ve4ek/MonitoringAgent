@@ -1,5 +1,6 @@
 package ru.hse.monitoringagent.controller;
 
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -19,6 +20,13 @@ public class ConfigController {
 
     public ConfigController(ConfigService configService) {
         this.configService = configService;
+    }
+
+    @GetMapping()
+    @Operation(summary = "Получить конфиг", description = "Возвращает актуальный конфиг в формате yaml")
+    public String getConfig() {
+        var config = configService.get();
+        return Yaml.pretty(config);
     }
 
     @PutMapping("/metrics/url")

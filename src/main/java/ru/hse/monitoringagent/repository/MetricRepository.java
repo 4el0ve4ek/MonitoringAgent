@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.hse.monitoringagent.model.Metric;
 
 @Repository
-public interface MetricRepository extends JpaRepository<Metric, String> {
+public interface MetricRepository extends JpaRepository<Metric, Integer> {
 }

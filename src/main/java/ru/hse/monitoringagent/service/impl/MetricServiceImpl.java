@@ -31,8 +31,8 @@ public class MetricServiceImpl implements MetricService {
     public void update(List<Metric> metrics) {
         for (var metric : metrics) {
             metric.calcID();
-
-            metricRepository.save(metric);
         }
+        
+        metricRepository.saveAll(metrics);
     }
 }

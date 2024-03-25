@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.hse.monitoringagent.model.Metric;
 import ru.hse.monitoringagent.service.MetricService;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,9 +21,12 @@ public class MetricCollectors {
     private final Logger logger = LoggerFactory.getLogger(MetricCollectors.class);
 
     public void poll() {
-        logger.info("start polling");
+        var now = Instant.now();
 
         metricService.update(collect());
+
+        var diff = Instant.now().toEpochMilli() - now.toEpochMilli();
+        logger.info("polling taked " + (double) (diff) / 1000. + "s");
     }
 
     public List<Metric> collect() {

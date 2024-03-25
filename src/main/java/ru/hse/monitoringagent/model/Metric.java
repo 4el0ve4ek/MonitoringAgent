@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,11 +15,11 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Entity
 @ToString
-public class Metric implements Serializable {
+public class Metric {
 
     @Id
     @Column(name = "id", nullable = false)
-    private String generatedCompoundID;
+    private int generatedCompoundID;
 
     private String name;
     private String source;
@@ -118,6 +117,6 @@ public class Metric implements Serializable {
                 .map(e -> e.getKey() + "," + e.getValue() + ";")
                 .collect(Collectors.joining());
 
-        generatedCompoundID = name + "#" + source + "#" + compoundLabels;
+        generatedCompoundID = (name + "#" + source + "#" + compoundLabels).hashCode();
     }
 }

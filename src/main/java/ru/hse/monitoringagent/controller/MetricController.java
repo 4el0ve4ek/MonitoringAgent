@@ -14,6 +14,7 @@ import ru.hse.monitoringagent.service.MetricService;
 import ru.hse.monitoringagent.service.collector.MetricCollectors;
 import ru.hse.monitoringagent.service.converter.PrometheusConverter;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController()
@@ -39,8 +40,13 @@ public class MetricController {
             @Parameter(description = "Нужно ли получить метриики напрямую из эндпоинтов")
             boolean force
     ) {
+        var now = Instant.now();
         List<Metric> metrics = force ? metricCollectors.collect() : metricService.getAll();
-        logger.info("accessed");
-        return prometheusMarshaller.marshal(metrics);
+
+        var ret = prometheusMarshaller.marshal(metrics);
+        var diff = Instant.now().toEpochMilli() - now.toEpochMilli();
+        logger.info("get data from storage" + (double) (diff) / 1000. + "s");
+
+        return ret;
     }
 }
