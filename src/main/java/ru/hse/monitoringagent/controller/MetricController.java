@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +39,8 @@ public class MetricController {
     public String getterPrometheusMetric(
             @RequestParam(required = false)
             @Parameter(description = "Нужно ли получить метриики напрямую из эндпоинтов")
-            boolean force
+            boolean force,
+            Authentication authentication
     ) {
         var now = Instant.now();
         List<Metric> metrics = force ? metricCollectors.collect() : metricService.getAll();

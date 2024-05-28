@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.hse.monitoringagent.service.ConfigService;
 
@@ -24,7 +25,7 @@ public class ConfigController {
 
     @GetMapping()
     @Operation(summary = "Получить конфиг", description = "Возвращает актуальный конфиг в формате yaml")
-    public String getConfig() {
+    public String getConfig(Authentication authentication) {
         var config = configService.get();
         return Yaml.pretty(config);
     }
@@ -34,7 +35,8 @@ public class ConfigController {
     public void addMetricURL(
             @RequestParam(name = "value")
             @Parameter(description = "Добавляемый эндпоинт", in = ParameterIn.QUERY)
-            String url
+            String url,
+            Authentication authentication
     ) {
         configService.addMetricURL(url);
     }
@@ -44,7 +46,8 @@ public class ConfigController {
     public void deleteMetricURL(
             @RequestParam(name = "value")
             @Parameter(description = "Удаляемый эндпоинт")
-            String url
+            String url,
+            Authentication authentication
     ) {
         configService.removeMetricURL(url);
     }
@@ -56,7 +59,8 @@ public class ConfigController {
     public ResponseEntity<?> setPollRate(
             @RequestParam(name = "value")
             @Parameter(description = "Новое значение переодичности")
-            int rate
+            int rate,
+            Authentication authentication
     ) {
         if (rate <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("rate must be positive number");
@@ -76,7 +80,8 @@ public class ConfigController {
     public ResponseEntity<?> setSaveRate(
             @RequestParam(name = "value")
             @Parameter(description = "Новое значение переодичности")
-            int rate
+            int rate,
+            Authentication authentication
     ) {
         if (rate <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("rate must be positive number");
