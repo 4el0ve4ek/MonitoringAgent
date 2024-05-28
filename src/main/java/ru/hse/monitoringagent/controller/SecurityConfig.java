@@ -36,19 +36,19 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(){
-        String password = "";
+        String prometheusPassword = "";
         try {
-            password = Files.readString(Path.of("password"));
+            prometheusPassword = Files.readString(Path.of("prometheus-password"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        UserDetails externalService = User.builder()
-                .username("external_service")
-                .password(passwordEncoder().encode(password))
+        UserDetails prometheus = User.builder()
+                .username("prometheus")
+                .password(passwordEncoder().encode(prometheusPassword))
                 .roles("EXTERNAL_SERVICE")
                 .build();
 
-        return new InMemoryUserDetailsManager(externalService);
+        return new InMemoryUserDetailsManager(prometheus);
     }
 }
