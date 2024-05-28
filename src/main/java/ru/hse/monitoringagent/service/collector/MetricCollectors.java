@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.hse.monitoringagent.model.Metric;
+import ru.hse.monitoringagent.repository.SnapshotRepository;
 import ru.hse.monitoringagent.service.MetricService;
 
 import java.time.Instant;
@@ -18,6 +19,8 @@ public class MetricCollectors {
 
     @Autowired
     private MetricService metricService;
+    @Autowired
+    private SnapshotRepository snapshotRepository;
     private final Logger logger = LoggerFactory.getLogger(MetricCollectors.class);
 
     public void poll() {
@@ -27,6 +30,8 @@ public class MetricCollectors {
 
         var diff = Instant.now().toEpochMilli() - now.toEpochMilli();
         logger.info("polling taked " + (double) (diff) / 1000. + "s");
+
+        snapshotRepository.saveDataOnMetricSave();
     }
 
     public List<Metric> collect() {
