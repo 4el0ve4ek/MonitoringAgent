@@ -16,13 +16,27 @@ public class SnapshotRepository {
     private JdbcTemplate jdbcTemplate;
     private final Logger logger = LoggerFactory.getLogger(ConfigRepository.class);
 
-    @PreDestroy
-    public void saveData() {
-        logger.info("save data to file");
+    public void saveDataByScheduler() {
+        logger.info("save data to file by scheduler");
         var now = Instant.now();
 
         try {
-            jdbcTemplate.execute("SCRIPT TO 'dump.sql'");
+            jdbcTemplate.execute("SCRIPT TO 'lagging-data.sql'");
+
+            var diff = Instant.now().toEpochMilli() - now.toEpochMilli();
+            logger.info("saving data takes " + (double) (diff) / 1000. + "s");
+        } catch (Exception ex) {
+            logger.error(ex.toString());
+        }
+    }
+
+    @PreDestroy
+    public void saveDataOnMetricSave() {
+        logger.info("save data to file on metric save");
+        var now = Instant.now();
+
+        try {
+            jdbcTemplate.execute("SCRIPT TO 'realtime-data.sql'");
 
             var diff = Instant.now().toEpochMilli() - now.toEpochMilli();
             logger.info("saving data takes " + (double) (diff) / 1000. + "s");

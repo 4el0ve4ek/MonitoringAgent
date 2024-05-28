@@ -48,7 +48,7 @@ public class SchedulingConfig implements SchedulingConfigurer {
         );
 
         taskRegistrar.addTriggerTask(
-                () -> snapshotRepository.saveData(),
+                () -> snapshotRepository.saveDataByScheduler(),
                 new ConfigurablePeriodicTrigger(Config::getSaveRate)
         );
     }
